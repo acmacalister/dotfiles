@@ -11,7 +11,9 @@ return {
     ["<leader>bn"] = { "<cmd>tabnew<cr>", desc = "New tab" },
     ["<leader>bD"] = {
       function()
-        require("astronvim.utils.status").heirline.buffer_picker(function(bufnr) require("astronvim.utils.buffer").close(bufnr) end)
+        require("astronvim.utils.status").heirline.buffer_picker(
+          function(bufnr) require("astronvim.utils.buffer").close(bufnr) end
+        )
       end,
       desc = "Pick to close",
     },
@@ -20,6 +22,9 @@ return {
     ["<leader>b"] = { name = "Buffers" },
     -- quick save
     -- ["<C-s>"] = { ":w!<cr>", desc = "Save File" },  -- change description but the same command
+    ["<leader>ff"] = { "<cmd>FzfxFiles<cr>", desc = "Find File" },
+    ["<leader>fg"] = { "<cmd>FzfxLiveGrep<cr>", desc = "Live Grep" },
+    ["<leader>fc"] = { "<cmd>FzfxLspReferences<cr>", desc = "Find References" },
   },
   t = {
     -- setting a mapping to false will disable it
