@@ -1,0 +1,32 @@
+# Start ssh-agent if not already running
+if not set -q SSH_AUTH_SOCK
+    ssh-agent -c | source
+    # Add your keys (adjust filenames as needed)
+    ssh-add ~/.ssh/id_rsa ~/.ssh/id_ed25519 ^/dev/null
+end
+
+# Go environment
+set -Ux GOPATH $HOME/go
+set -Ux GOBIN $GOPATH/bin
+fish_add_path $GOBIN
+fish_add_path /usr/local/go/bin
+
+# Set global default Nodejs version
+nvm use v22.18.0
+
+# Setup AWS Bedrock
+set -Ux AWS_BEARER_TOKEN_BEDROCK {{ onepasswordRead "op://Private/AWS Bedrock Token/credential" }}
+set -Ux CLAUDE_CODE_USE_BEDROCK 1
+set -Ux AWS_REGION us-east-1
+
+# Alias vi to nvim
+alias vi nvim
+alias vim nvim
+
+# Optional: Set Neovim as the default $EDITOR and $VISUAL for other programs
+set -gx EDITOR nvim
+set -gx VISUAL nvim
+
+zoxide init fish | source
+starship init fish | source -
+status is-interactive; and rbenv init - fish | source

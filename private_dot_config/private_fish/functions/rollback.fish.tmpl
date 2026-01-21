@@ -1,0 +1,12 @@
+function rollback
+    if test (count $argv) -lt 3
+        echo "Usage: restart <deployment-name> <container-name> <image:tag>"
+        return 1
+    end
+
+    set deployment $argv[1]
+    set container $argv[2]
+    set image $argv[3]
+
+    kubectl set image deployment/$deployment $container={{ onepasswordRead "op://Private/AWS ECR Registry/credential" }}/$image
+end
