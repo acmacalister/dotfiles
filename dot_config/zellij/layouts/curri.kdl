@@ -1,0 +1,69 @@
+  layout {
+
+    tab name="Dev" {
+        // Top tab-bar plugin
+        pane size=1 borderless=true {
+            plugin location="tab-bar"
+        }
+
+        // Main content
+        pane split_direction="vertical" {
+            pane split_direction="horizontal" {
+                pane {
+                    command "hx"
+                    args "."
+                    cwd "."
+                }
+
+                pane size=14 command="fish" cwd="."
+            }
+
+            pane size=80 split_direction="horizontal" {
+                pane {
+                    command "overmind"
+                    args "s" "-N"
+                    cwd "."
+                }
+
+                pane {
+                    command "rush"
+                    args "build" "--watch"
+                    cwd "."
+                }
+            }
+        }
+
+        // Bottom status-bar plugin
+        pane size=1 borderless=true {
+            plugin location="status-bar"
+        }
+    }
+
+    tab name="Git" {    
+        // Top tab-bar plugin
+        pane size=1 borderless=true {
+            plugin location="tab-bar"
+          }
+
+        pane command="lazygit" cwd="."
+      
+        // Bottom status-bar plugin
+        pane size=1 borderless=true {
+            plugin location="status-bar"
+        }
+    }
+    
+    tab name="Crush" {    
+        // Top tab-bar plugin
+        pane size=1 borderless=true {
+            plugin location="tab-bar"
+        }
+
+        pane command="crush" cwd="."
+      
+        // Bottom status-bar plugin
+        pane size=1 borderless=true {
+            plugin location="status-bar"
+        }
+    }
+}
