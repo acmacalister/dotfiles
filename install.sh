@@ -74,7 +74,7 @@ CLI_TOOLS=(
   neovim     # Modern Vim alternative
   helix      # Modal text editor
   starship   # Customizable shell prompt
-  rust       # Rust programming language
+  zig        # Zig programming language
   go         # Go programming language
   zellij     # Terminal workspace manager
   gh         # GitHub CLI
@@ -103,3 +103,9 @@ for app in "${CASK_APPS[@]}"; do
 done
 
 echo "All tools and applications installed successfully!"
+
+echo "Installing rust"
+
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+echo "Be sure to download Xcode from the App Store and install the Command Line Tools by running 'xcode-select --install' in the terminal."

@@ -1,32 +1,49 @@
-# Start ssh-agent if not already running
-if not set -q SSH_AUTH_SOCK
-    ssh-agent -c | source
-    # Add your keys (adjust filenames as needed)
-    ssh-add ~/.ssh/id_rsa ~/.ssh/id_ed25519 ^/dev/null
+if status is-interactive
+    starship init fish | source
 end
 
-# Go environment
-set -Ux GOPATH $HOME/go
-set -Ux GOBIN $GOPATH/bin
-fish_add_path $GOBIN
-fish_add_path /usr/local/go/bin
+# env var sets
+set -gx GOPATH (go env GOPATH)
+set -gx BREW_PATH (brew --prefix)
+set -Ux EDITOR nvim
+set -Ux VISUAL nvim
+set -x ANDROID_HOME $HOME/Library/Android/sdk
+set -x PATH $PATH $ANDROID_HOME/emulator
+set -x PATH $PATH $ANDROID_HOME/platform-tools
+set -x JAVA_HOME /Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
+set -x NODE_OPTIONS "--max-old-space-size=8192"
 
-# Set global default Nodejs version
-nvm use v22.18.0
+set -x GH_PAT {{ onepasswordRead "op://Private/GitHub PAT/credential" | quote }}
+set -x GITHUB_TOKEN $GH_PAT
+set -x SENTRY_ACCESS_TOKEN {{ onepasswordRead "op://Private/Sentry Access Token/credential" | quote }}
+set -x SENTRY_AUTH_TOKEN $SENTRY_ACCESS_TOKEN
+set -x EXPO_ACCESS_TOKEN {{ onepasswordRead "op://Private/Expo Access Token/credential" | quote }}
+set -x DD_API_KEY {{ onepasswordRead "op://Private/Datadog API Key/credential" | quote }}
+set -x DD_APPLICATION_KEY {{ onepasswordRead "op://Private/Datadog Application Key/credential" | quote }}
+set -x DD_APP_KEY $DD_APPLICATION_KEY
+set -x K6_LOAD_TEST_EMAIL {{ onepasswordRead "op://Private/K6 Load Test/email" | quote }}
+set -x K6_LOAD_TEST_PASSWORD {{ onepasswordRead "op://Private/K6 Load Test/password" | quote }}
+set -x CURRI_READ_REPLICA_URI {{ onepasswordRead "op://Private/Curri Read Replica URI/credential" | quote }}
+set -x DATABASE_URL $CURRI_READ_REPLICA_URI
 
-# Setup AWS Bedrock
-set -Ux AWS_BEARER_TOKEN_BEDROCK {{ onepasswordRead "op://Private/AWS Bedrock Token/credential" }}
-set -Ux CLAUDE_CODE_USE_BEDROCK 1
-set -Ux AWS_REGION us-east-1
+# Fish Paths
+fish_add_path $HOME/.cargo/bin
+fish_add_path $BREW_PATH/opt/python@3.9/libexec/bin
+fish_add_path $HOME/.local/share/nvm/v22.18.0/bin
 
-# Alias vi to nvim
+# Aliases
+alias python python3
+alias tailscale '/Applications/Tailscale.app/Contents/MacOS/Tailscale'
 alias vi nvim
-alias vim nvim
+alias nt='new_tab'
+alias crush-dev='/Users/austin/code/crush/crush-dev'
+alias switcboard='/Users/austin/code/switchboard/switchboard'
+# Node
+nvm use v22.18.0 >>/dev/null
 
-# Optional: Set Neovim as the default $EDITOR and $VISUAL for other programs
-set -gx EDITOR nvim
-set -gx VISUAL nvim
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/austin/google-cloud-sdk/path.fish.inc' ]
+    . '/Users/austin/google-cloud-sdk/path.fish.inc'
+end
 
-zoxide init fish | source
-starship init fish | source -
-status is-interactive; and rbenv init - fish | source
+source /Users/austin/.docker/init-fish.sh || true # Added by Docker Desktop

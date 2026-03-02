@@ -1,18 +1,22 @@
-theme = "catppuccin_mocha"
+theme = "nord"
 
-[editor]
-line-number = "relative"
-cursorline = true
-color-modes = true
-clipboard-provider = "pasteboard"
+[keys.normal]
+C-s = ":w" # Maps the Ctrl-s to the typable command :w which is an alias for :write (save file)
+"C-q" = "wclose"
 
-[editor.cursor-shape]
-insert = "bar"
-normal = "block"
-select = "underline"
+# Maps the Ctrl-o to opening of the helix config file
+C-o = ":open ~/.config/helix/config.toml"
 
-[editor.indent-guides]
-render = true
+# Print the current line's git blame information to the statusline.
+space.B = ":echo %sh{git blame -L %{cursor_line},+1 %{buffer_name}}"
 
-[editor.file-picker]
-hidden = false
+# "C-c" = ["yank_joined_to_clipboard", "yank"]
+# "C-v" = ["paste_clipboard_after"]
+"y" = ["yank_joined_to_clipboard", "yank"]
+"p" = ["paste_clipboard_after"]
+
+[keys.select]
+# "C-c" = ["yank_joined_to_clipboard", "yank"]
+# "C-v" = ["paste_clipboard_after"]
+"y" = ["yank_joined_to_clipboard", "yank"]
+"p" = ["paste_clipboard_after"]

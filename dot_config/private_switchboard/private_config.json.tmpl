@@ -1,0 +1,89 @@
+{
+  "integrations": {
+    "aws": {
+      "enabled": true,
+      "credentials": {
+        "access_key_id": "",
+        "region": "",
+        "secret_access_key": "",
+        "session_token": ""
+      }
+    },
+    "datadog": {
+      "enabled": true,
+      "credentials": {
+        "api_key": "{{ onepasswordRead "op://Private/Datadog API Key/credential" }}",
+        "app_key": "{{ onepasswordRead "op://Private/Datadog Application Key/credential" }}"
+      }
+    },
+    "github": {
+      "enabled": true,
+      "credentials": {
+        "client_id": "",
+        "token": "{{ onepasswordRead "op://Private/GitHub PAT/credential" }}",
+        "token_source": ""
+      }
+    },
+    "linear": {
+      "enabled": true,
+      "credentials": {
+        "client_id": "",
+        "client_secret": ""
+      }
+    },
+    "linear_mcp": {
+      "enabled": true,
+      "credentials": {
+        "access_token": "{{ onepasswordRead "op://Private/Linear MCP Token/credential" }}",
+        "token_source": "oauth"
+      }
+    },
+    "metabase": {
+      "enabled": false,
+      "credentials": {
+        "api_key": "",
+        "url": ""
+      }
+    },
+    "postgres": {
+      "enabled": true,
+      "credentials": {
+        "connection_string": "{{ onepasswordRead "op://Private/Curri Read Replica URI/credential" }}",
+        "database": "",
+        "host": "",
+        "password": "",
+        "port": "",
+        "read_only": "",
+        "sslmode": "",
+        "user": ""
+      }
+    },
+    "posthog": {
+      "enabled": false,
+      "credentials": {
+        "api_key": "",
+        "base_url": "",
+        "project_id": ""
+      }
+    },
+    "sentry": {
+      "enabled": true,
+      "credentials": {
+        "auth_token": "{{ onepasswordRead "op://Private/Sentry Access Token/credential" }}",
+        "client_id": "",
+        "organization": "",
+        "token_source": ""
+      }
+    },
+    "slack": {
+      "enabled": false,
+      "credentials": {
+        "client_id": "",
+        "client_secret": "",
+        "cookie": "",
+        "token": "",
+        "token_source": ""
+      }
+    }
+  }
+}
