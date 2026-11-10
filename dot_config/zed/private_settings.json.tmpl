@@ -1,0 +1,95 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run the `open default settings` command
+// from the command palette or from `Zed` application menu.
+{
+  "cli_default_open_behavior": "new_window",
+  "project_panel": {
+    "dock": "left"
+  },
+  "outline_panel": {
+    "dock": "left"
+  },
+  "collaboration_panel": {
+    "dock": "left"
+  },
+  "git_panel": {
+    "dock": "left"
+  },
+  "agent": {
+    "dock": "right",
+    "model_parameters": [],
+{{- if has "curri" (splitList "," .contexts) }}
+    "default_model": {
+      "provider": "curri_gateway",
+      "model": "anthropic/claude-opus-4-8"
+    },
+{{- end }}
+    "version": "2"
+  },
+{{- if has "curri" (splitList "," .contexts) }}
+  "language_models": {
+    "openai_compatible": {
+      "curri_gateway": {
+        "api_url": "https://gateway.ai.cloudflare.com/v1/a9d106d880527eaecdaf7835b792849d/curri-gateway/compat",
+        "custom_headers": {
+          "cf-aig-metadata": "{\"developer_id\": \"austin.cherry\", \"task_type\": \"interactive\", \"tool\": \"zed\", \"tier\": \"frontier\"}",
+          "cf-aig-collect-log-payload": "false"
+        },
+        "available_models": [
+          { "name": "anthropic/claude-opus-4-8", "display_name": "Claude Opus 4.8", "max_tokens": 200000, "max_output_tokens": 16384, "capabilities": { "tools": true, "images": true, "parallel_tool_calls": false, "prompt_cache_key": true } },
+          { "name": "anthropic/claude-sonnet-4-5-20250514", "display_name": "Claude Sonnet 4.5", "max_tokens": 200000, "max_output_tokens": 16384, "capabilities": { "tools": true, "images": true, "parallel_tool_calls": false, "prompt_cache_key": true } },
+          { "name": "anthropic/claude-haiku-4-5-20241022", "display_name": "Claude Haiku 4.5", "max_tokens": 200000, "max_output_tokens": 8192, "capabilities": { "tools": true, "images": true, "parallel_tool_calls": false, "prompt_cache_key": true } },
+          { "name": "openai/gpt-5.5", "display_name": "GPT-5.5", "max_tokens": 272000, "max_output_tokens": 16384, "capabilities": { "tools": true, "images": true, "parallel_tool_calls": false, "prompt_cache_key": false } },
+          { "name": "openai/gpt-5.2", "display_name": "GPT-5.2", "max_tokens": 200000, "max_output_tokens": 16384, "capabilities": { "tools": true, "images": true, "parallel_tool_calls": false, "prompt_cache_key": false } },
+          { "name": "openai/gpt-5.1", "display_name": "GPT-5.1", "max_tokens": 200000, "max_output_tokens": 8192, "capabilities": { "tools": true, "images": true, "parallel_tool_calls": false, "prompt_cache_key": false } },
+          { "name": "google-ai-studio/gemini-3.1-pro-preview", "display_name": "Gemini 3.1 Pro (preview)", "max_tokens": 1000000, "max_output_tokens": 16384, "capabilities": { "tools": true, "images": true, "parallel_tool_calls": false, "prompt_cache_key": false } },
+          { "name": "google-ai-studio/gemini-2.5-pro", "display_name": "Gemini 2.5 Pro", "max_tokens": 1000000, "max_output_tokens": 16384, "capabilities": { "tools": true, "images": true, "parallel_tool_calls": false, "prompt_cache_key": false } },
+          { "name": "google-ai-studio/gemini-2.5-flash", "display_name": "Gemini 2.5 Flash", "max_tokens": 1000000, "max_output_tokens": 8192, "capabilities": { "tools": true, "images": true, "parallel_tool_calls": false, "prompt_cache_key": false } },
+          { "name": "workers-ai/@cf/moonshotai/kimi-k2.6", "display_name": "Kimi K2.6", "max_tokens": 262144, "max_output_tokens": 16384, "capabilities": { "tools": true, "images": true, "parallel_tool_calls": false, "prompt_cache_key": false } }
+        ]
+      }
+    }
+  },
+{{- end }}
+  "base_keymap": "VSCode",
+  "theme": "Catppuccin Mocha - No Italics",
+  "buffer_font_size": 15,
+  "languages": {
+    "JavaScript": {
+      "formatter": {
+        "external": {
+          "command": "prettier",
+          "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+      }
+    },
+    "TypeScript": {
+      "formatter": {
+        "external": {
+          "command": "prettier",
+          "arguments": [
+            "--config",
+            ".pretterrc.json",
+            "--stdin-filepath",
+            "{buffer_path}"
+          ]
+        }
+      }
+    }
+  },
+  "lsp": {
+    "vtsls": {
+      "settings": {
+        // For TypeScript:
+        "typescript": { "tsserver": { "maxTsServerMemory": 16184 } },
+        // For JavaScript:
+        "javascript": { "tsserver": { "maxTsServerMemory": 16184 } }
+      }
+    }
+  }
+}

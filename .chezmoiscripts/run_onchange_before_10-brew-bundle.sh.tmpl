@@ -1,0 +1,16 @@
+#!/bin/bash
+# Re-runs whenever the Brewfile changes. Brewfile hash: {{ include "Brewfile" | sha256sum }}
+set -uo pipefail
+
+if [ -x /opt/homebrew/bin/brew ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [ -x /usr/local/bin/brew ]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+else
+  echo "Homebrew is not installed; run install.sh first." >&2
+  exit 1
+fi
+
+if ! brew bundle --file={{ joinPath .chezmoi.sourceDir "Brewfile" | quote }}; then
+  echo "brew bundle reported failures (often an app that was installed outside Homebrew). Re-run 'brew bundle --file={{ joinPath .chezmoi.sourceDir "Brewfile" }}' to retry." >&2
+fi

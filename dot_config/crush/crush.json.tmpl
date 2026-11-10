@@ -1,0 +1,8 @@
+{{- $cfg := include ".chezmoitemplates/crush/base.json" | fromJson -}}
+{{- range $context := splitList "," .contexts -}}
+{{-   $fragment := printf ".chezmoitemplates/crush/%s.json" $context -}}
+{{-   if stat (joinPath $.chezmoi.sourceDir $fragment) -}}
+{{-     $cfg = mergeOverwrite $cfg (include $fragment | fromJson) -}}
+{{-   end -}}
+{{- end -}}
+{{ $cfg | toPrettyJson }}

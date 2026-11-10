@@ -1,0 +1,88 @@
+{
+  "$schema": "https://charm.land/crush.json",
+  "lsp": {
+    "go": {
+      "command": "gopls",
+      "env": {
+        "GOTOOLCHAIN": "go1.25.5"
+      }
+    },
+    "json": {
+      "args": [
+        "--stdio"
+      ],
+      "command": "vscode-json-language-server"
+    },
+    "swift": {
+      "command": "sourcekit-lsp"
+    },
+    "typescript": {
+      "args": [
+        "--stdio"
+      ],
+      "command": "typescript-language-server"
+    },
+    "yaml": {
+      "args": [
+        "--stdio"
+      ],
+      "command": "yaml-language-server"
+    }
+  },
+  "mcp": {
+    "chrome-devtools": {
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ],
+      "command": "npx",
+      "type": "stdio"
+    }
+  },
+  "options": {
+    "request_timeout": 900
+  },
+  "permissions": {
+    "allowed_tools": [
+      "bash(git *)",
+      "bash(grep *)",
+      "view",
+      "edit",
+      "multiedit",
+      "write",
+      "bash",
+      "grep",
+      "glob",
+      "ls",
+      "agent",
+      "fetch",
+      "agentic_fetch",
+      "download",
+      "sourcegraph",
+      "todos",
+      "lsp_diagnostics",
+      "lsp_references",
+      "mcp_stitch_create_project",
+      "mcp_stitch_edit_screens",
+      "mcp_stitch_generate_screen_from_text",
+      "mcp_stitch_generate_variants",
+      "mcp_stitch_get_project",
+      "mcp_stitch_get_screen",
+      "mcp_stitch_list_projects",
+      "mcp_stitch_list_screens",
+      "mcp_switchboard_search",
+      "mcp_switchboard_execute",
+      "mcp_switchboard_pin",
+      "mcp_switchboard_history",
+      "mcp_switchboard_session"
+    ]
+  },
+  "providers": {
+    "Local (Ollama)": {
+      "api_key": "ollama",
+      "base_url": "http://localhost:11434/v1",
+      "discover_models": true,
+      "type": "openai-compat"
+    }
+  }
+}

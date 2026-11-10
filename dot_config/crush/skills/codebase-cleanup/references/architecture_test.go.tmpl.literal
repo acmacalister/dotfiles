@@ -1,0 +1,148 @@
+package agents_test
+
+// Template for an import-rule test that enforces the ports-and-adapters
+// layout. Copy to the module root as architecture_test.go, set the package
+// clause to "<rootpkg>_test", and fill in the rule tables. Uses only the
+// standard library and respects build constraints for the current platform.
+
+import (
+	"go/build"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"slices"
+	"strings"
+	"testing"
+)
+
+// rootAllowedImports lists module-internal or third-party packages the root
+// domain package may import. Everything else must be the standard library.
+var rootAllowedImports = []string{
+	"github.com/google/uuid",
+}
+
+// adapterDirs are module-relative package roots that implement or drive the
+// domain (driven and driving adapters). Adapters must not import each other.
+var adapterDirs = []string{
+	"postgres", "http", "nats", "slack", "github", "k8s", "linear", "sentry",
+}
+
+// allowedEdges records existing, accepted exceptions as "from -> to" with the
+// reason. Each cleanup run tries to delete entries; never add one without a
+// reason a reviewer can check.
+var allowedEdges = map[string]string{
+	// "http -> postgres": "test hooks type-assert *postgres.PgStore; see #123",
+}
+
+func TestArchitecture(t *testing.T) {
+	t.Parallel()
+
+	modPath, root := readModule(t)
+	pkgs := loadPackages(t, root, modPath)
+
+	isStd := func(imp string) bool {
+		first, _, _ := strings.Cut(imp, "/")
+		return !strings.Contains(first, ".")
+	}
+	isMock := func(rel string) bool { return rel == "mock" || strings.HasPrefix(rel, "mock/") }
+	adapterOf := func(rel string) string {
+		for _, dir := range adapterDirs {
+			if rel == dir || strings.HasPrefix(rel, dir+"/") {
+				return dir
+			}
+		}
+		return ""
+	}
+
+	var violations []string
+	for rel, imports := range pkgs {
+		for _, imp := range imports {
+			impRel, internal := strings.CutPrefix(imp, modPath+"/")
+			if imp == modPath {
+				impRel, internal = ".", true
+			}
+			edge := rel + " -> " + impRel
+			if _, ok := allowedEdges[edge]; ok {
+				continue
+			}
+			switch {
+			case rel == "." && !isStd(imp) && !slices.Contains(rootAllowedImports, imp):
+				violations = append(violations, edge+": the root domain package must not depend on "+imp)
+			case internal && strings.HasPrefix(impRel, "cmd/"):
+				violations = append(violations, edge+": nothing may import a main package")
+			case internal && isMock(impRel) && !isMock(rel):
+				violations = append(violations, edge+": production code must not import test doubles")
+			case internal && adapterOf(rel) != "" && adapterOf(impRel) != "" && adapterOf(rel) != adapterOf(impRel):
+				violations = append(violations, edge+": adapters talk through root interfaces, not each other")
+			}
+		}
+	}
+	for edge := range allowedEdges {
+		from, to, _ := strings.Cut(edge, " -> ")
+		target := modPath + "/" + to
+		if to == "." {
+			target = modPath
+		}
+		if !slices.Contains(pkgs[from], target) {
+			violations = append(violations, edge+": allowed edge no longer exists; delete it from allowedEdges")
+		}
+	}
+	slices.Sort(violations)
+	for _, v := range violations {
+		t.Error(v)
+	}
+}
+
+func readModule(t *testing.T) (modPath, root string) {
+	t.Helper()
+	root, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(filepath.Join(root, "go.mod"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for line := range strings.Lines(string(raw)) {
+		if rest, ok := strings.CutPrefix(strings.TrimSpace(line), "module "); ok {
+			return strings.TrimSpace(rest), root
+		}
+	}
+	t.Fatal("module path not found in go.mod")
+	return "", ""
+}
+
+// loadPackages maps each module-relative package dir to its non-test imports.
+func loadPackages(t *testing.T, root, modPath string) map[string][]string {
+	t.Helper()
+	pkgs := map[string][]string{}
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() {
+			return nil
+		}
+		name := d.Name()
+		if path != root && (strings.HasPrefix(name, ".") || strings.HasPrefix(name, "_") ||
+			name == "testdata" || name == "vendor" || name == "node_modules" || name == "tmp") {
+			return filepath.SkipDir
+		}
+		if path != root {
+			if _, err := os.Stat(filepath.Join(path, "go.mod")); err == nil {
+				return filepath.SkipDir
+			}
+		}
+		pkg, err := build.Default.ImportDir(path, 0)
+		if err != nil {
+			return nil
+		}
+		rel, _ := filepath.Rel(root, path)
+		pkgs[filepath.ToSlash(rel)] = pkg.Imports
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return pkgs
+}

@@ -1,0 +1,33 @@
+README.md
+AGENTS.md
+install.sh
+Brewfile
+Brewfile.lock.json
+scripts
+.crush
+**/.DS_Store
+
+{{- $contexts := splitList "," .contexts }}
+
+{{- if not (has "personal" $contexts) }}
+.config/secrets/personal.env
+.config/fish/functions/kcc.fish
+{{- end }}
+
+{{- if not (has "curri" $contexts) }}
+.config/secrets/curri.env
+.config/fish/functions/kcurri.fish
+.config/fish/functions/subnet_ips.fish
+.config/fish/functions/rollback.fish
+.config/zellij/layouts/curri.kdl
+.config/switchboard
+.config/switchboard/**
+.config/crush/skills/pr-shepherd
+.config/crush/skills/pr-shepherd/**
+.config/crush/skills/sentry-debug
+.config/crush/skills/sentry-debug/**
+{{- end }}
+
+{{- if not (has "render" $contexts) }}
+.config/secrets/render.env
+{{- end }}

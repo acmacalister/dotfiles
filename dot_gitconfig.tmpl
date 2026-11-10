@@ -1,0 +1,15 @@
+[user]
+	name = {{ .name }}
+	email = {{ .email }}
+[pack]
+	windowMemory = 256m
+[core]
+	compression = 1
+[credential]
+	helper = osxkeychain
+[credential "https://github.com"]
+	helper =
+	helper = !gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !gh auth git-credential

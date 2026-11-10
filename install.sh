@@ -1,111 +1,67 @@
 #!/bin/bash
+# Bootstraps a new Mac: Homebrew, 1Password, chezmoi, then applies these
+# dotfiles. chezmoi's run scripts take care of the Brewfile, language
+# toolchains, fish plugins, and Ollama models.
+set -euo pipefail
 
-# Function to check and install packages via Homebrew
-install_brew_package() {
-  if ! brew list "$1" &> /dev/null; then
-    echo "Installing $1..."
-    brew install "$1"
-  else
-    echo "$1 is already installed."
-  fi
-}
+DOTFILES_REPO="acmacalister"
 
-# Function to install cask apps (for GUI applications like Docker, etc.)
-install_brew_cask() {
-  if ! brew list --cask "$1" &> /dev/null; then
-    echo "Installing $1 (cask)..."
-    brew install --cask "$1"
-  else
-    echo "$1 is already installed (cask)."
-  fi
-}
+echo "==> Xcode Command Line Tools"
+if ! xcode-select -p >/dev/null 2>&1; then
+  xcode-select --install
+  echo "Finish the Command Line Tools installer, then re-run this script."
+  exit 1
+fi
 
-# Check if Homebrew is installed, if not install it
-if ! command -v brew &> /dev/null; then
-  echo "Homebrew not found. Installing Homebrew..."
+echo "==> Homebrew"
+if ! command -v brew >/dev/null 2>&1 && [ ! -x /opt/homebrew/bin/brew ]; then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-else
-  echo "Homebrew is already installed."
 fi
+eval "$(/opt/homebrew/bin/brew shellenv 2>/dev/null || /usr/local/bin/brew shellenv)"
 
-# Install 1Password CLI (needed for chezmoi templates)
-install_brew_cask 1password-cli
+echo "==> 1Password (needed to render secrets in chezmoi templates)"
+brew list --cask 1password >/dev/null 2>&1 || brew install --cask 1password
+brew list --cask 1password-cli >/dev/null 2>&1 || brew install --cask 1password-cli
 
-# Install Fish shell
-install_brew_package fish
+until op vault list >/dev/null 2>&1; do
+  cat <<'EOF'
 
-# Install ChezMoi
-install_brew_package chezmoi
+1Password CLI is not connected yet. To fix:
+  1. Open 1Password and sign in.
+  2. Settings > Developer > enable "Integrate with 1Password CLI".
+EOF
+  read -r -p "Press Enter to check again (Ctrl-C to abort)... " _ </dev/tty
+done
 
-# Initialize ChezMoi with your dotfiles repository
-DOTFILES_REPO="https://github.com/acmacalister/dotfiles.git"
+echo "==> fish and chezmoi"
+brew list fish >/dev/null 2>&1 || brew install fish
+brew list chezmoi >/dev/null 2>&1 || brew install chezmoi
+
+echo "==> Applying dotfiles"
 if [ ! -d "$HOME/.local/share/chezmoi" ]; then
-  echo "Initializing ChezMoi with dotfiles repository..."
-  chezmoi init --apply "$DOTFILES_REPO"
+  INIT_ARGS=()
+  if [ -n "${DOTFILES_CONTEXTS:-}" ]; then
+    INIT_ARGS+=(--promptString "contexts=$DOTFILES_CONTEXTS")
+  fi
+  chezmoi init --apply ${INIT_ARGS[@]+"${INIT_ARGS[@]}"} "$DOTFILES_REPO" </dev/tty
 else
-  echo "ChezMoi is already initialized."
+  chezmoi update </dev/tty
 fi
 
-# Set Fish as the default shell if it's not already
-if [[ "$SHELL" != *fish ]]; then
-  echo "Setting Fish as the default shell..."
-  chsh -s "$(which fish)"
-else
-  echo "Fish is already the default shell."
+echo "==> Default shell"
+FISH_PATH="$(brew --prefix)/bin/fish"
+if ! grep -qx "$FISH_PATH" /etc/shells; then
+  echo "$FISH_PATH" | sudo tee -a /etc/shells >/dev/null
+fi
+if [ "${SHELL:-}" != "$FISH_PATH" ]; then
+  chsh -s "$FISH_PATH" </dev/tty
 fi
 
-# Install additional tools via Homebrew
-CLI_TOOLS=(
-  bun        # JavaScript runtime
-  curl       # Command-line HTTP client
-  dbmate     # Database migration tool
-  doctl      # DigitalOcean CLI
-  just       # Task runner
-  ripgrep    # Fast grep alternative
-  fd         # Simple, fast alternative to 'find'
-  fzf        # Fuzzy finder
-  jq         # JSON processor
-  kubectl    # Kubernetes CLI
-  lazygit    # Simple terminal UI for Git
-  lego       # Let's Encrypt client
-  mise       # Dev tool version manager
-  scc        # Code counter
-  bottom     # System monitor
-  neovim     # Modern Vim alternative
-  helix      # Modal text editor
-  starship   # Customizable shell prompt
-  zig        # Zig programming language
-  go         # Go programming language
-  zellij     # Terminal workspace manager
-  gh         # GitHub CLI
-  bat        # Cat command alternative with syntax highlighting
-  git-delta  # Syntax-highlighting pager for Git
-  sops       # Secrets management tool
-  yq         # YAML processor
-  postgresql # PostgreSQL database
-)
+cat <<'EOF'
 
-for tool in "${CLI_TOOLS[@]}"; do
-  install_brew_package "$tool"
-done
-
-# Install GUI apps via Homebrew Cask
-CASK_APPS=(
-  zed         # Zed code editor
-  docker      # Docker for Mac
-  ghostty     # Ghostty terminal emulator
-  postico     # PostgreSQL client
-  1password   # 1Password password manager
-)
-
-for app in "${CASK_APPS[@]}"; do
-  install_brew_cask "$app"
-done
-
-echo "All tools and applications installed successfully!"
-
-echo "Installing rust"
-
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
-echo "Be sure to download Xcode from the App Store and install the Command Line Tools by running 'xcode-select --install' in the terminal."
+Done. Remaining manual steps:
+  - gh auth login, then: gh extension install dlvhdr/gh-dash
+  - Create or import SSH keys (~/.ssh/id_ed25519) and add them to GitHub
+  - Install Xcode from the App Store if you need iOS tooling
+  - Open a new terminal to start using fish
+EOF

@@ -1,0 +1,11 @@
+Include ~/.colima/ssh_config
+Include ~/.ssh/config.local
+
+Host *
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ~/.ssh/id_ed25519
+
+Host github.com
+  ServerAliveInterval 60
+  ServerAliveCountMax 10

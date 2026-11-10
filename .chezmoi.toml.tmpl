@@ -1,0 +1,8 @@
+{{- $name := promptStringOnce . "name" "Git author name" "Austin Cherry" -}}
+{{- $email := promptStringOnce . "email" "Git author email" "acmacalister@gmail.com" -}}
+{{- $contexts := promptStringOnce . "contexts" "Secret contexts for this machine, comma-separated (personal, curri, render)" "personal" -}}
+
+[data]
+    name = {{ $name | quote }}
+    email = {{ $email | quote }}
+    contexts = {{ $contexts | replace " " "" | quote }}
