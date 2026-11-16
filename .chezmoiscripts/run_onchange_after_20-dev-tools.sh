@@ -18,6 +18,7 @@ GO_TOOLS=(
   github.com/go-task/task/v3/cmd/task@latest
   github.com/a-h/templ/cmd/templ@latest
   github.com/axzilla/templui/cmd/templui@latest
+  github.com/terraform-linters/tflint@latest
 )
 
 NPM_GLOBALS=(

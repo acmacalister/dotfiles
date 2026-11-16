@@ -17,25 +17,20 @@ def app_cask(token, apps: [], bins: [], paths: [])
   cask token
 end
 
-tap "1password/tap"
-tap "charmbracelet/tap"
-tap "codecrafters-io/tap"
-tap "derailed/k9s"
-tap "derailed/popeye"
-tap "fairwindsops/tap", "https://github.com/FairwindsOps/homebrew-tap"
-tap "goreleaser/tap"
-tap "hashicorp/tap"
-tap "leg100/tap"
-tap "nats-io/nats-tools"
-tap "ory/tap"
-tap "oven-sh/bun"
-tap "porter-dev/porter"
-tap "pulumi/tap"
-tap "runreveal/runreveal"
-tap "rwx-cloud/tap"
-tap "skiptools/skip"
-tap "trufflesecurity/trufflehog"
-tap "turbot/tap"
+tap "1password/tap", trusted: true
+tap "charmbracelet/tap", trusted: true
+tap "derailed/k9s", trusted: true
+tap "derailed/popeye", trusted: true
+tap "fairwindsops/tap", "https://github.com/FairwindsOps/homebrew-tap", trusted: true
+tap "goreleaser/tap", trusted: true
+tap "hashicorp/tap", trusted: true
+tap "nats-io/nats-tools", trusted: true
+tap "ory/tap", trusted: true
+tap "oven-sh/bun", trusted: true
+tap "pulumi/tap", trusted: true
+tap "runreveal/runreveal", trusted: true
+tap "rwx-cloud/tap", trusted: true
+tap "trufflesecurity/trufflehog", trusted: true
 
 # Shell, prompt, terminal workspace
 brew "fish"
@@ -96,7 +91,6 @@ brew "golangci-lint"
 brew "gosec"
 brew "govulncheck"
 brew "zig"
-brew "deno"
 brew "oven-sh/bun/bun"
 brew "elixir"
 brew "rbenv"
@@ -105,7 +99,6 @@ brew "pipx"
 brew "python@3.10"
 brew "python@3.11"
 brew "python@3.12"
-brew "openssl@1.1"
 brew "cmake"
 brew "wasmtime"
 brew "tailwindcss"
@@ -116,8 +109,6 @@ brew "mise"
 brew "charmbracelet/tap/crush"
 brew "charmbracelet/tap/mods"
 brew "charmbracelet/tap/glow"
-brew "charmbracelet/tap/skate"
-brew "charmbracelet/tap/wishlist"
 brew "llama.cpp"
 brew "ollama"
 
@@ -145,15 +136,10 @@ brew "ansible"
 brew "ansible-lint"
 brew "hashicorp/tap/packer"
 brew "hashicorp/tap/terraform"
-brew "tflint"
-brew "leg100/tap/pug"
 brew "pulumi/tap/pulumi"
-brew "porter-dev/porter/porter"
 brew "rwx-cloud/tap/rwx"
 brew "ory/tap/cli"
 brew "runreveal/runreveal/runreveal"
-brew "turbot/tap/steampipe"
-brew "codecrafters-io/tap/codecrafters"
 brew "lego"
 brew "rclone"
 brew "fastlane"
@@ -191,7 +177,6 @@ unless ENV["DOTFILES_SKIP_SECURITY_TOOLS"]
   brew "testssl"
   app_cask "burp-suite", apps: ["Burp Suite", "Burp Suite Community Edition", "Burp Suite Professional"]
   app_cask "caido", apps: ["Caido"]
-  app_cask "zap", apps: ["ZAP", "OWASP ZAP"]
   app_cask "mitmproxy", bins: ["mitmproxy"]
 end
 
@@ -199,10 +184,7 @@ end
 app_cask "1password", apps: ["1Password", "1Password 7"]
 app_cask "1password-cli", bins: ["op"]
 app_cask "ghostty", apps: ["Ghostty"]
-app_cask "alacritty", apps: ["Alacritty"]
 app_cask "zed", apps: ["Zed"]
-app_cask "visual-studio-code", apps: ["Visual Studio Code"]
-app_cask "neovide-app", apps: ["Neovide"]
 app_cask "claude-code", bins: ["claude"]
 app_cask "claude", apps: ["Claude"]
 app_cask "chatgpt", apps: ["ChatGPT"]
@@ -218,5 +200,4 @@ app_cask "fossa", bins: ["fossa"]
 app_cask "goreleaser/tap/goreleaser", bins: ["goreleaser"]
 app_cask "android-platform-tools", bins: ["adb"]
 app_cask "zulu@17", paths: ["/Library/Java/JavaVirtualMachines/zulu-17.jdk"]
-app_cask "skiptools/skip/skip", bins: ["skip"]
 app_cask "swiftcord", apps: ["Swiftcord"]

@@ -16,7 +16,7 @@ curl -fsSL https://raw.githubusercontent.com/acmacalister/dotfiles/master/instal
 1. `brew bundle` installs everything in [`Brewfile`](Brewfile)
 2. install Go tools, fish plugins, Node v22.18.0 + global npm CLIs, Rust, and gh extensions
 
-Set `DOTFILES_SKIP_SECURITY_TOOLS=1` before running to leave out the pentest tools (nmap, sqlmap, Burp, ZAP, ...), which some corporate endpoint security flags.
+Set `DOTFILES_SKIP_SECURITY_TOOLS=1` before running to leave out the pentest tools (nmap, sqlmap, Burp, Caido, ...), which some corporate endpoint security flags.
 
 After it finishes: `gh auth login`, set up SSH keys, and open a new terminal.
 

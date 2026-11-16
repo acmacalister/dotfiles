@@ -1,8 +1,33 @@
 {{- $name := promptStringOnce . "name" "Git author name" "Austin Cherry" -}}
 {{- $email := promptStringOnce . "email" "Git author email" "acmacalister@gmail.com" -}}
-{{- $contexts := promptStringOnce . "contexts" "Secret contexts for this machine, comma-separated (personal, curri, render)" "personal" -}}
+
+{{- $valid := list "personal" "curri" "render" -}}
+{{- $prompt := "Secret contexts for this machine, comma-separated (personal, curri, render)" -}}
+
+{{- /* DOTFILES_CONTEXTS wins, then a previously saved value, then a prompt. */ -}}
+{{- $contexts := env "DOTFILES_CONTEXTS" -}}
+{{- if not $contexts -}}
+{{-   $contexts = get . "contexts" | default "" -}}
+{{- end -}}
+
+{{- /* Re-prompt when the saved/env value is empty or contains an unknown context
+       (e.g. a typo), instead of failing later in every template. */ -}}
+{{- $isValid := true -}}
+{{- range splitList "," ($contexts | lower | replace " " "") -}}
+{{-   if not (has . $valid) }}{{ $isValid = false }}{{ end -}}
+{{- end -}}
+{{- if or (not $contexts) (not $isValid) -}}
+{{-   $contexts = promptString $prompt "personal" -}}
+{{- end -}}
+
+{{- $contexts = $contexts | lower | replace " " "" -}}
+{{- range splitList "," $contexts -}}
+{{-   if not (has . $valid) -}}
+{{-     fail (printf "unknown context %q; valid contexts are: %s" . (join ", " $valid)) -}}
+{{-   end -}}
+{{- end }}
 
 [data]
     name = {{ $name | quote }}
     email = {{ $email | quote }}
-    contexts = {{ $contexts | replace " " "" | quote }}
+    contexts = {{ $contexts | quote }}

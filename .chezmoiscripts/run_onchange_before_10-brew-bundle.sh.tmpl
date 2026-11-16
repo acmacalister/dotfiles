@@ -2,6 +2,8 @@
 # Re-runs whenever the Brewfile changes. Brewfile hash: {{ include "Brewfile" | sha256sum }}
 set -uo pipefail
 
+BREWFILE={{ joinPath .chezmoi.sourceDir "Brewfile" | quote }}
+
 if [ -x /opt/homebrew/bin/brew ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [ -x /usr/local/bin/brew ]; then
@@ -11,6 +13,16 @@ else
   exit 1
 fi
 
-if ! brew bundle --file={{ joinPath .chezmoi.sourceDir "Brewfile" | quote }}; then
-  echo "brew bundle reported failures (often an app that was installed outside Homebrew). Re-run 'brew bundle --file={{ joinPath .chezmoi.sourceDir "Brewfile" }}' to retry." >&2
+# Newer Homebrew refuses to load formulae from third-party taps until they are
+# trusted. The Brewfile marks its taps trusted, but taps that were added by an
+# earlier (failed) run stay untrusted, so trust them explicitly first.
+if brew trust --help >/dev/null 2>&1; then
+  for tap in $(brew bundle list --tap --file="$BREWFILE" 2>/dev/null); do
+    brew tap "$tap" >/dev/null 2>&1 || true
+    brew trust --tap "$tap" >/dev/null 2>&1 || echo "warning: could not trust tap $tap" >&2
+  done
+fi
+
+if ! brew bundle --file="$BREWFILE"; then
+  echo "brew bundle reported failures. Re-run 'brew bundle --file=$BREWFILE' to retry." >&2
 fi

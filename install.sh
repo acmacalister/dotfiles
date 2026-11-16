@@ -52,14 +52,14 @@ command -v fish >/dev/null 2>&1 || brew install fish
 command -v chezmoi >/dev/null 2>&1 || brew install chezmoi
 
 echo "==> Applying dotfiles"
+# DOTFILES_CONTEXTS (e.g. "personal,render") is read by .chezmoi.toml.tmpl;
+# without it chezmoi prompts once and validates the answer.
 if [ ! -d "$HOME/.local/share/chezmoi" ]; then
-  INIT_ARGS=()
-  if [ -n "${DOTFILES_CONTEXTS:-}" ]; then
-    INIT_ARGS+=(--promptString "contexts=$DOTFILES_CONTEXTS")
-  fi
-  chezmoi init --apply ${INIT_ARGS[@]+"${INIT_ARGS[@]}"} "$DOTFILES_REPO" </dev/tty
+  chezmoi init --apply "$DOTFILES_REPO" </dev/tty
 else
-  chezmoi update </dev/tty
+  chezmoi git pull -- --ff-only
+  chezmoi init </dev/tty
+  chezmoi apply </dev/tty
 fi
 
 echo "==> Default shell"
