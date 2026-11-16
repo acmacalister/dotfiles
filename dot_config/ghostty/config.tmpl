@@ -1,0 +1,9 @@
+macos-option-as-alt = left
+keybind = shift+enter=text:\x1b\r
+{{- $fish := lookPath "fish" }}
+{{- if and (not $fish) (stat "/opt/homebrew/bin/fish") }}
+{{-   $fish = "/opt/homebrew/bin/fish" }}
+{{- end }}
+{{- if $fish }}
+command = {{ $fish }} --login
+{{- end }}

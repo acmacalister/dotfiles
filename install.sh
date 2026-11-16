@@ -67,8 +67,21 @@ FISH_PATH="$(command -v fish)"
 if ! grep -qx "$FISH_PATH" /etc/shells; then
   echo "$FISH_PATH" | sudo tee -a /etc/shells >/dev/null
 fi
-if [ "${SHELL:-}" != "$FISH_PATH" ]; then
-  chsh -s "$FISH_PATH" </dev/tty
+
+# $SHELL is inherited from the login session and goes stale after chsh, so
+# check (and verify) the account record instead.
+login_shell() {
+  dscl . -read "/Users/$USER" UserShell 2>/dev/null | awk '{print $2}'
+}
+if [ "$(login_shell)" != "$FISH_PATH" ]; then
+  chsh -s "$FISH_PATH" </dev/tty || true
+fi
+if [ "$(login_shell)" = "$FISH_PATH" ]; then
+  echo "Login shell is $FISH_PATH."
+else
+  echo "warning: login shell is still $(login_shell). The account may be managed by" >&2
+  echo "your company (MDM / directory account). Ghostty is configured to start fish" >&2
+  echo "directly; for other terminals ask IT to allow: chsh -s $FISH_PATH" >&2
 fi
 
 cat <<'EOF'
@@ -77,5 +90,7 @@ Done. Remaining manual steps:
   - gh auth login, then: gh extension install dlvhdr/gh-dash
   - Create or import SSH keys (~/.ssh/id_ed25519) and add them to GitHub
   - Install Xcode from the App Store if you need iOS tooling
-  - Open a new terminal to start using fish
+  - Quit your terminal app completely (Cmd+Q) and reopen it to get fish.
+    Apps keep the old shell until they restart; log out and back in if
+    Terminal.app or iTerm still opens zsh.
 EOF
