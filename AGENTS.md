@@ -133,5 +133,6 @@ Complex functions validate args with `test (count $argv)`, print usage on misuse
 3. **Zellij keybinds use `clear-defaults=true`** — only bindings in `config.kdl` work.
 4. **Node is pinned** to v22.18.0 (`nvm use` in `config.fish`, installed by the dev-tools script).
 5. **Offensive security tools** in the Brewfile are skipped when `DOTFILES_SKIP_SECURITY_TOOLS=1` is set.
+8. **Add casks with `app_cask`, not `cask`.** `app_cask "slack", apps: ["Slack"]` skips the cask when the app (or `bins:`/`paths:`) already exists outside Homebrew, e.g. MDM-installed apps on work laptops; plain `cask` makes `brew bundle` fail there. `install.sh` does the same for 1Password, fish, and chezmoi.
 6. **crush.json is a template now.** Settings changed in the Crush UI are overwritten by the next `chezmoi apply`; move them into `.chezmoitemplates/crush/*.json` instead.
 7. **The repo is public.** Only 1Password references go in the repo, never values.

@@ -1,3 +1,22 @@
+# Work laptops often ship apps via MDM or direct download. Declaring a cask for
+# an app that is already present (but not managed by Homebrew) makes
+# `brew bundle` fail, so reuse the existing install instead.
+def existing_install?(apps: [], bins: [], paths: [])
+  app_dirs = ["/Applications", File.expand_path("~/Applications")]
+  search_path = (ENV["HOMEBREW_PATH"] || ENV["PATH"] || "").split(":")
+  apps.any? { |app| app_dirs.any? { |dir| File.directory?(File.join(dir, "#{app}.app")) } } ||
+    bins.any? { |bin| search_path.any? { |dir| File.executable?(File.join(dir, bin)) } } ||
+    paths.any? { |path| File.exist?(path) }
+end
+
+def app_cask(token, apps: [], bins: [], paths: [])
+  prefix = ENV["HOMEBREW_PREFIX"] || "/opt/homebrew"
+  managed_by_brew = File.directory?(File.join(prefix, "Caskroom", token.split("/").last))
+  return if !managed_by_brew && existing_install?(apps: apps, bins: bins, paths: paths)
+
+  cask token
+end
+
 tap "1password/tap"
 tap "charmbracelet/tap"
 tap "codecrafters-io/tap"
@@ -170,34 +189,34 @@ unless ENV["DOTFILES_SKIP_SECURITY_TOOLS"]
   brew "nikto"
   brew "sqlmap"
   brew "testssl"
-  cask "burp-suite"
-  cask "caido"
-  cask "zap"
-  cask "mitmproxy"
+  app_cask "burp-suite", apps: ["Burp Suite", "Burp Suite Community Edition", "Burp Suite Professional"]
+  app_cask "caido", apps: ["Caido"]
+  app_cask "zap", apps: ["ZAP", "OWASP ZAP"]
+  app_cask "mitmproxy", bins: ["mitmproxy"]
 end
 
 # Apps
-cask "1password"
-cask "1password-cli"
-cask "ghostty"
-cask "alacritty"
-cask "zed"
-cask "visual-studio-code"
-cask "neovide-app"
-cask "claude-code"
-cask "claude"
-cask "chatgpt"
-cask "cmux"
-cask "raycast"
-cask "cleanshot"
-cask "tailscale-app"
-cask "google-chrome"
-cask "slack"
-cask "postico"
-cask "multipass"
-cask "fossa"
-cask "goreleaser/tap/goreleaser"
-cask "android-platform-tools"
-cask "zulu@17"
-cask "skiptools/skip/skip"
-cask "swiftcord"
+app_cask "1password", apps: ["1Password", "1Password 7"]
+app_cask "1password-cli", bins: ["op"]
+app_cask "ghostty", apps: ["Ghostty"]
+app_cask "alacritty", apps: ["Alacritty"]
+app_cask "zed", apps: ["Zed"]
+app_cask "visual-studio-code", apps: ["Visual Studio Code"]
+app_cask "neovide-app", apps: ["Neovide"]
+app_cask "claude-code", bins: ["claude"]
+app_cask "claude", apps: ["Claude"]
+app_cask "chatgpt", apps: ["ChatGPT"]
+app_cask "cmux", apps: ["cmux"]
+app_cask "raycast", apps: ["Raycast"]
+app_cask "cleanshot", apps: ["CleanShot X"]
+app_cask "tailscale-app", apps: ["Tailscale"]
+app_cask "google-chrome", apps: ["Google Chrome"]
+app_cask "slack", apps: ["Slack"]
+app_cask "postico", apps: ["Postico 2", "Postico"]
+app_cask "multipass", bins: ["multipass"]
+app_cask "fossa", bins: ["fossa"]
+app_cask "goreleaser/tap/goreleaser", bins: ["goreleaser"]
+app_cask "android-platform-tools", bins: ["adb"]
+app_cask "zulu@17", paths: ["/Library/Java/JavaVirtualMachines/zulu-17.jdk"]
+app_cask "skiptools/skip/skip", bins: ["skip"]
+app_cask "swiftcord", apps: ["Swiftcord"]

@@ -19,9 +19,23 @@ if ! command -v brew >/dev/null 2>&1 && [ ! -x /opt/homebrew/bin/brew ]; then
 fi
 eval "$(/opt/homebrew/bin/brew shellenv 2>/dev/null || /usr/local/bin/brew shellenv)"
 
+# Work laptops often ship apps through MDM or direct downloads. Reuse anything
+# already present instead of letting Homebrew fail on an existing app bundle.
+app_installed() {
+  [ -d "/Applications/$1.app" ] || [ -d "$HOME/Applications/$1.app" ]
+}
+
 echo "==> 1Password (needed to render secrets in chezmoi templates)"
-brew list --cask 1password >/dev/null 2>&1 || brew install --cask 1password
-brew list --cask 1password-cli >/dev/null 2>&1 || brew install --cask 1password-cli
+if app_installed "1Password" || app_installed "1Password 7"; then
+  echo "1Password app already installed; using it."
+else
+  brew install --cask 1password
+fi
+if command -v op >/dev/null 2>&1; then
+  echo "1Password CLI already installed at $(command -v op); using it."
+else
+  brew install --cask 1password-cli
+fi
 
 until op vault list >/dev/null 2>&1; do
   cat <<'EOF'
@@ -34,8 +48,8 @@ EOF
 done
 
 echo "==> fish and chezmoi"
-brew list fish >/dev/null 2>&1 || brew install fish
-brew list chezmoi >/dev/null 2>&1 || brew install chezmoi
+command -v fish >/dev/null 2>&1 || brew install fish
+command -v chezmoi >/dev/null 2>&1 || brew install chezmoi
 
 echo "==> Applying dotfiles"
 if [ ! -d "$HOME/.local/share/chezmoi" ]; then
@@ -49,7 +63,7 @@ else
 fi
 
 echo "==> Default shell"
-FISH_PATH="$(brew --prefix)/bin/fish"
+FISH_PATH="$(command -v fish)"
 if ! grep -qx "$FISH_PATH" /etc/shells; then
   echo "$FISH_PATH" | sudo tee -a /etc/shells >/dev/null
 fi
